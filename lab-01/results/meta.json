@@ -1,0 +1,4 @@
+{
+    "algorithm": "aes-cbc",
+    "source": "images/checkerboard.png"
+}
