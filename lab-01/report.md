@@ -110,11 +110,11 @@ public static SecretKey similarKey(SecretKey key, int bits) {
 
 Результаты шифрования: 
 
-![[Pasted image 20261013132846.png]]
+<img src="https://github.com/Ryuuuukun/crypto-labs/blob/main/lab-01/results/encrypts.png"></img>
 
 Гистограммы исходного и зашифрованных изображений:
 
-![[Pasted image 20261013140959.png]]
+<img src="https://github.com/Ryuuuukun/crypto-labs/blob/main/lab-01/results/histograms.png"></img>
 
 Эксперимент с изменение ключа для алгоритма `AES-CBC`. Был изменен самый младший бит в ключе:
 
