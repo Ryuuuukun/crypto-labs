@@ -1,0 +1,14 @@
+{
+    "method": "encrypted random",
+    "source": "images/braindead.png",
+    "message": "Hello, World!",
+    "password": "something",
+
+    "messageAuto": true,
+    "messageSeed": null,
+    "messageLength": 20000,
+
+    "passwordAuto": false,
+    "passwordSeed": null,
+    "passwordLength": 1000
+}
