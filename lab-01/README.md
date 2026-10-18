@@ -2,7 +2,7 @@
 
 В качестве первого аргумента запуска программы передается путь к файлу с параметрами шифрования (по умолчанию это `results/meta.json`). Структура файла `meta.json`:
 
-```json
+```jsonc
 {
     "algorithm": "thread|aes-ecb|aes-cbc", // required
     "source": "path",                      // required

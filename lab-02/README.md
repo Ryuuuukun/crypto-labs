@@ -1,6 +1,6 @@
 ### Использование программы
 
-Параметры программы задаются в файле `results/meta.json`. Параметры программы:
+Параметры программы задаются в файле `results/meta.json`:
 
 ```jsonc
 {
@@ -11,7 +11,7 @@
     "message": "string|null",
     "password": "string|null",
 
-    // параметры генерации пароля, в случае messageAuto=true 
+    // параметры генерации сообщения, в случае messageAuto=true 
     // поле message игнорируется
     "messageAuto": "true|false",
     "messageSeed": "number",    // default: random
