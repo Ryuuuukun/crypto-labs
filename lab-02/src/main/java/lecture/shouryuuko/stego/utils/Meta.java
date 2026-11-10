@@ -8,6 +8,8 @@ public record Meta(
         String message,
         String password,
 
+        Boolean showHistogram,
+
         Long messageSeed,
         Boolean messageAuto,
         Integer messageLength,

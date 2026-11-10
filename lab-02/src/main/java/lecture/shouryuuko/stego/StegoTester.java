@@ -16,6 +16,8 @@ public class StegoTester {
     private String currentSource;
     private String currentMethod;
 
+    private boolean showHistogram;
+
     public void testPlain(String message, File source) throws IOException {
         var method = new PlainStego();
 
@@ -33,6 +35,7 @@ public class StegoTester {
         this.currentSource = source.getName();
         this.showMetrics(original, stego, message.getBytes(), extract);
         this.showDifferenceMap(original, originalBytes, stegoBytes);
+        if (this.showHistogram) this.showHistogram(original, stego);
     }
 
     public void testEncrypted(String password, String message, File source) throws Exception {
@@ -52,6 +55,7 @@ public class StegoTester {
         this.currentSource = source.getName();
         this.showMetrics(original, stego, message.getBytes(), extract);
         this.showDifferenceMap(original, originalBytes, stegoBytes);
+        if (this.showHistogram) this.showHistogram(original, stego);
     }
 
     public void testEncryptedRandom(String password, String message, File source) throws Exception {
@@ -71,6 +75,7 @@ public class StegoTester {
         this.currentSource = source.getName();
         this.showMetrics(original, stego, message.getBytes(), extract);
         this.showDifferenceMap(original, originalBytes, stegoBytes);
+        if (this.showHistogram) this.showHistogram(original, stego);
     }
 
     protected void showDifferenceMap(BufferedImage image, byte[] original, byte[] stego) throws IOException {
@@ -120,5 +125,20 @@ public class StegoTester {
                 distOriginal[0], distOriginal[1], xi2original[0], xi2original[1],
                 distStego[0], distStego[1], xi2stego[0], xi2stego[1]
         );
+    }
+
+    protected void showHistogram(BufferedImage original, BufferedImage stego) {
+        System.out.println("Histogarm for original image:");
+        System.out.println(Arrays.toString(Metrics.histogram(original)));
+        System.out.println("Histogram for stego image:");
+        System.out.println(Arrays.toString(Metrics.histogram(stego)));
+    }
+
+    public boolean isShowHistogram() {
+        return showHistogram;
+    }
+
+    public void setShowHistogram(boolean showHistogram) {
+        this.showHistogram = showHistogram;
     }
 }

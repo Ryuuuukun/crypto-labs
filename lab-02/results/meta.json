@@ -1,16 +1,14 @@
 {
     "method": "encrypted random",
     "source": "images/work_shift.png",
-    "message": "Hello, World!",
-    "password": "something",
 
-    "diffmapPath": "results",
+    "showHistogram": true,
 
     "messageAuto": true,
-    "messageSeed": null,
-    "messageLength": 1000,
+    "messageSeed": 1234,
+    "messageLength": 10000,
 
-    "passwordAuto": false,
-    "passwordSeed": null,
+    "passwordAuto": true,
+    "passwordSeed": 1234,
     "passwordLength": 1000
 }

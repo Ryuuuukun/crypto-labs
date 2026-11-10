@@ -19,6 +19,8 @@ public class Main {
             }
 
             var tester = new StegoTester();
+            tester.setShowHistogram(meta.showHistogram() != null && meta.showHistogram());
+
             switch (meta.method()) {
                 case "plain"            -> tester.testPlain(meta.getMessage(), source);
                 case "encrypted"        -> tester.testEncrypted(meta.getPassword(), meta.getMessage(), source);
