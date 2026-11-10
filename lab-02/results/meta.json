@@ -1,12 +1,14 @@
 {
     "method": "encrypted random",
-    "source": "images/braindead.png",
+    "source": "images/work_shift.png",
     "message": "Hello, World!",
     "password": "something",
 
+    "diffmapPath": "results",
+
     "messageAuto": true,
     "messageSeed": null,
-    "messageLength": 20000,
+    "messageLength": 1000,
 
     "passwordAuto": false,
     "passwordSeed": null,

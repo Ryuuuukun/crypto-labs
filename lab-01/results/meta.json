@@ -1,4 +1,7 @@
 {
     "algorithm": "aes-cbc",
-    "source": "images/checkerboard.png"
+    "source": "images/braindead.png",
+
+    "pathEncrypted": "images/encrypt",
+    "pathDecrypted": "images/decrypt"
 }

@@ -1,21 +1,36 @@
 package lecture.shouryuuko.stego.utils;
 
+import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.statistics.inference.ChiSquareTest;
 
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Metrics {
-    public static double psnr(byte[] original, byte[] stego) {
-        if (original.length != stego.length) {
-            throw new IllegalArgumentException("Original and stego must have the same size.");
-        }
+    public static final double RED_IMPACT_COEFF   = 0.299;
+    public static final double GREEN_IMPACT_COEFF = 0.587;
+    public static final double BLUE_IMPACT_COEFF  = 0.114;
+
+    public static double psnr(BufferedImage original, BufferedImage stego) {
+        assert original.getWidth() == stego.getWidth();
+        assert original.getHeight() == stego.getHeight();
 
         var mse = 0.0;
-        for (int i = 0; i < original.length; ++i) {
-            mse += Math.pow(original[i] & 0xFF - stego[i] & 0xFF, 2);
+        for (int i = 0; i < original.getHeight(); ++i) {
+            for (int j = 0; j < original.getWidth(); ++j) {
+                mse += Math.pow(getLightmass(original.getRGB(i, j)) - getLightmass(stego.getRGB(i, j)), 2);
+            }
         }
 
-        return mse == 0 ? Double.POSITIVE_INFINITY : 10 * Math.log10(255.0 * 255.0 / (mse / original.length));
+        return mse == 0 ? Double.POSITIVE_INFINITY :
+                10 * Math.log10(255.0 * 255.0 / (mse / (original.getHeight() * original.getWidth())));
+    }
+
+    public static double getLightmass(int pixel) {
+        return RED_IMPACT_COEFF    * ((pixel >> 16) & 0xFF) +
+                GREEN_IMPACT_COEFF * ((pixel >> 8) & 0xFF)  +
+                BLUE_IMPACT_COEFF  * (pixel & 0xFF);
     }
 
     public static double ssim(byte[] original, byte[] stego) {
@@ -97,22 +112,45 @@ public class Metrics {
         return result;
     }
 
-    public static double[] xi2test(byte[] original, byte[] stego) {
-        var histogramOriginal = histogram(original);
-        var histogramStego = histogram(stego);
+    public static double[] xi2test(BufferedImage image) {
+        var histogram = histogram(image);
 
-        var expected = Arrays.stream(histogramOriginal).mapToDouble(c -> c + 0.5).toArray();
-        var observed = Arrays.stream(histogramStego).map(c -> c + 1).toArray();
+        var xi2square = 0.0;
+        var freedom = 0;
 
-        var result = ChiSquareTest.withDefaults().test(expected, observed);
+        for (int i = 0; i < 128; ++i) {
+            var a = histogram[i * 2];
+            var b = histogram[i * 2 + 1];
 
-        return new double[] { result.getStatistic(), result.getPValue() };
+            var total = a + b;
+            if (total == 0) continue;
+
+            var expected = total / 2.0;
+            xi2square +=
+                    Math.pow(a - expected, 2) / expected +
+                    Math.pow(b - expected, 2) / expected;
+
+            ++freedom;
+        }
+
+        if (freedom == 0) {
+            throw new IllegalArgumentException("Image contains no pixels");
+        }
+
+        var pvalue = Gamma.regularizedGammaQ(
+                freedom / 2.0,
+                xi2square
+        );
+
+        return new double[] { xi2square, pvalue };
     }
 
-    public static long[] histogram(byte[] source) {
+    public static long[] histogram(BufferedImage image) {
         var histogram = new long[256];
-        for (var b : source) {
-            ++histogram[b & 0xFF];
+        for (int y = 0; y < image.getHeight(); ++y) {
+            for (int x = 0; x < image.getWidth(); ++x) {
+                ++histogram[(int) Metrics.getLightmass(image.getRGB(x, y))];
+            }
         }
 
         return histogram;

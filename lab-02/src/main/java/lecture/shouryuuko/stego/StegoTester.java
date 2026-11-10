@@ -6,6 +6,7 @@ import lecture.shouryuuko.stego.stego.PlainStego;
 import lecture.shouryuuko.stego.utils.ImageUtils;
 import lecture.shouryuuko.stego.utils.Metrics;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -18,52 +19,58 @@ public class StegoTester {
     public void testPlain(String message, File source) throws IOException {
         var method = new PlainStego();
 
-        var image = ImageUtils.repackImage(ImageUtils.loadImage(source), BufferedImage.TYPE_3BYTE_BGR);
+        var original = ImageUtils.repackImage(ImageUtils.loadImage(source), BufferedImage.TYPE_3BYTE_BGR);
+        var stego = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 
-        var stego = ImageUtils.getBytes(image);
-        var original = Arrays.copyOf(stego, stego.length);
+        var originalBytes = ImageUtils.getBytes(original);
+        var stegoBytes = ImageUtils.getBytes(stego);
+        System.arraycopy(originalBytes, 0, stegoBytes, 0, originalBytes.length);
 
-        method.inject(message.getBytes(), stego);
-        var extract = method.extract(stego);
+        method.inject(message.getBytes(), stegoBytes);
+        var extract = method.extract(stegoBytes);
 
         this.currentMethod = "plain";
         this.currentSource = source.getName();
         this.showMetrics(original, stego, message.getBytes(), extract);
-        this.showDifferenceMap(image, original, stego);
+        this.showDifferenceMap(original, originalBytes, stegoBytes);
     }
 
     public void testEncrypted(String password, String message, File source) throws Exception {
         var method = new EncryptedStego();
 
-        var image = ImageUtils.repackImage(ImageUtils.loadImage(source), BufferedImage.TYPE_3BYTE_BGR);
+        var original = ImageUtils.repackImage(ImageUtils.loadImage(source), BufferedImage.TYPE_3BYTE_BGR);
+        var stego = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 
-        var stego = ImageUtils.getBytes(image);
-        var original = Arrays.copyOf(stego, stego.length);
+        var originalBytes = ImageUtils.getBytes(original);
+        var stegoBytes = ImageUtils.getBytes(stego);
+        System.arraycopy(originalBytes, 0, stegoBytes, 0, originalBytes.length);
 
-        method.inject(password.getBytes(), message.getBytes(), stego);
-        var extract = method.extract(password.getBytes(), stego);
+        method.inject(password.getBytes(), message.getBytes(), stegoBytes);
+        var extract = method.extract(password.getBytes(), stegoBytes);
 
         this.currentMethod = "encrypted";
         this.currentSource = source.getName();
         this.showMetrics(original, stego, message.getBytes(), extract);
-        this.showDifferenceMap(image, original, stego);
+        this.showDifferenceMap(original, originalBytes, stegoBytes);
     }
 
     public void testEncryptedRandom(String password, String message, File source) throws Exception {
         var method = new EncryptedRandomStego();
 
-        var image = ImageUtils.repackImage(ImageUtils.loadImage(source), BufferedImage.TYPE_3BYTE_BGR);
+        var original = ImageUtils.repackImage(ImageUtils.loadImage(source), BufferedImage.TYPE_3BYTE_BGR);
+        var stego = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
 
-        var stego = ImageUtils.getBytes(image);
-        var original = Arrays.copyOf(stego, stego.length);
+        var originalBytes = ImageUtils.getBytes(original);
+        var stegoBytes = ImageUtils.getBytes(stego);
+        System.arraycopy(originalBytes, 0, stegoBytes, 0, originalBytes.length);
 
-        method.inject(password.getBytes(), message.getBytes(), stego);
-        var extract = method.extract(password.getBytes(), stego);
+        method.inject(password.getBytes(), message.getBytes(), stegoBytes);
+        var extract = method.extract(password.getBytes(), stegoBytes);
 
         this.currentMethod = "encrypted random";
         this.currentSource = source.getName();
         this.showMetrics(original, stego, message.getBytes(), extract);
-        this.showDifferenceMap(image, original, stego);
+        this.showDifferenceMap(original, originalBytes, stegoBytes);
     }
 
     protected void showDifferenceMap(BufferedImage image, byte[] original, byte[] stego) throws IOException {
@@ -76,38 +83,42 @@ public class StegoTester {
         ImageUtils.saveImage(mapImage, "results/diffmap_" + this.currentMethod.replaceAll(" +", "_") + ".png", "png");
     }
 
-    protected void showMetrics(byte[] original, byte[] stego, byte[] data, byte[] extract) {
-        var pnsr  = Metrics.psnr(original, stego);
-        var ssim  = Metrics.ssim(original, stego);
-        var xi2   = Metrics.xi2test(original, stego);
-        var ratio = Metrics.changedRatio(original, stego);
+    protected void showMetrics(BufferedImage original, BufferedImage stego, byte[] data, byte[] extract) {
+        var originalBytes = ImageUtils.getBytes(original);
+        var stegoBytes = ImageUtils.getBytes(stego);
 
-        var distOriginal = Metrics.distribution(original);
-        var distStego = Metrics.distribution(stego);
+        var pnsr  = Metrics.psnr(original, stego);
+        var ssim  = Metrics.ssim(originalBytes, stegoBytes);
+
+        var xi2original = Metrics.xi2test(original);
+        var xi2stego = Metrics.xi2test(stego);
+
+        var ratio = Metrics.changedRatio(originalBytes, stegoBytes);
+
+        var distOriginal = Metrics.distribution(originalBytes);
+        var distStego = Metrics.distribution(stegoBytes);
 
         System.out.printf("""
-                ┌─────────────────────────────────┐
-                | Method: %-24s|
-                | Source: %-24s|
-                ├─────────────────────────────────┤
-                | PNSR          | %15.5f |
-                | SSIM          | %15.5f |
-                | p-value       | %15.5f |
-                | xi²           | %15.5f |
-                | ratio         | %14.5f%% |
-                | reversibility | %15b |
-                ├─────────────────────────────────┤
-                | Image |  P(LSB)=0  |  P(LSB)=1  |
-                ├─────────────────────────────────┤
-                | cover | %10.5f | %10.5f |
-                | stego | %10.5f | %10.5f |
-                └─────────────────────────────────┘
+                ┌───────────────────────────────────────────────────────────┐
+                | Method: %-50s|
+                | Source: %-50s|
+                ├───────────────────────────────────────────────────────────┤
+                | PSNR          | %41.5f |
+                | SSIM          | %41.5f |
+                | ratio         | %40.5f%% |
+                | reversibility | %41b |
+                ├───────────────────────────────────────────────────────────┤
+                | Image |  P(LSB)=0  |  P(LSB)=1  |     xi²    |  p-value   |
+                ├───────────────────────────────────────────────────────────┤
+                | cover | %10.5f | %10.5f | %10.2f | %10.5f |
+                | stego | %10.5f | %10.5f | %10.2f | %10.5f |
+                └───────────────────────────────────────────────────────────┘
                 """,
                 this.currentMethod, this.currentSource,
-                pnsr, ssim, xi2[1], xi2[0], ratio,
-                Arrays.hashCode(data) == Arrays.hashCode(extract),
-                distOriginal[0], distOriginal[1],
-                distStego[0], distStego[1]
+                pnsr, ssim, ratio,
+                Arrays.compare(data, extract) == 0,
+                distOriginal[0], distOriginal[1], xi2original[0], xi2original[1],
+                distStego[0], distStego[1], xi2stego[0], xi2stego[1]
         );
     }
 }

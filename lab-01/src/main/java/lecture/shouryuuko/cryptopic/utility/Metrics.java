@@ -18,10 +18,10 @@ public class Metrics {
     public static double corr(BufferedImage image, int px, int py) {
         var meanX = 0.0;
         var meanY = 0.0;
-        for (int y = 0; y < image.getHeight(); ++y) {
-            for (int x = 0; x < image.getWidth() - 1; ++x) {
-                meanX += getLightmass(image.getRGB(x, y));
-                meanY += getLightmass(image.getRGB(x + 1, y));
+        for (int y = 0; y < image.getHeight() - py; ++y) {
+            for (int x = 0; x < image.getWidth() - px; ++x) {
+                meanX += getLightmass(image.getRGB(x + px, y + py));
+                meanY += getLightmass(image.getRGB(x + px, y + py));
             }
         }
 
@@ -78,33 +78,32 @@ public class Metrics {
     }
 
     public static double npcr(BufferedImage cryptoA, BufferedImage cryptoB) {
-        assert cryptoA.getHeight() == cryptoB.getHeight();
-        assert cryptoA.getWidth() == cryptoB.getWidth();
+        var cryptoABytes = ImageUtils.getBytes(cryptoA);
+        var cryptoBBytes = ImageUtils.getBytes(cryptoB);
+
+        assert cryptoABytes.length == cryptoBBytes.length;
 
         int diffs = 0;
-        for (int y = 0; y < cryptoA.getHeight(); ++y) {
-            for (int x = 0; x < cryptoA.getWidth(); ++x) {
-                if (cryptoA.getRGB(x, y) != cryptoB.getRGB(x, y)) {
-                    ++diffs;
-                }
+        for (int i = 0; i < cryptoABytes.length; ++i) {
+            if (cryptoABytes[i] != cryptoBBytes[i]) {
+                ++diffs;
             }
         }
 
-        return (double) diffs / (cryptoA.getHeight() * cryptoA.getWidth()) * 100.0;
+        return (double) diffs / cryptoABytes.length * 100.0;
     }
 
     public static double uaci(BufferedImage cryptoA, BufferedImage cryptoB) {
-        assert cryptoA.getHeight() == cryptoB.getHeight();
-        assert cryptoA.getWidth() == cryptoB.getWidth();
+        var cryptoABytes = ImageUtils.getBytes(cryptoA);
+        var cryptoBBytes = ImageUtils.getBytes(cryptoB);
+
+        assert cryptoABytes.length == cryptoBBytes.length;
 
         double sum = 0.0;
-        for (int y = 0; y < cryptoA.getHeight(); ++y) {
-            for (int x = 0; x < cryptoA.getWidth(); ++x) {
-                sum += Math.abs(Metrics.getLightmass(cryptoA.getRGB(x, y)) -
-                        Metrics.getLightmass(cryptoB.getRGB(x, y))) / 255.0;
-            }
+        for (int i = 0; i < cryptoABytes.length; ++i) {
+            sum += Math.abs(cryptoABytes[i] - cryptoBBytes[i]) / 255.0;
         }
 
-        return sum / (cryptoA.getHeight() * cryptoB.getWidth()) * 100.0;
+        return sum / cryptoABytes.length * 100.0;
     }
 }
