@@ -33,6 +33,9 @@ public class StegoTester {
 
         this.currentMethod = "plain";
         this.currentSource = source.getName();
+
+        ImageUtils.saveImage(stego, "results/stego_" + this.currentMethod.replaceAll(" +", "_") + ".png", "png");
+
         this.showMetrics(original, stego, message.getBytes(), extract);
         this.showDifferenceMap(original, originalBytes, stegoBytes);
         if (this.showHistogram) this.showHistogram(original, stego);
@@ -51,8 +54,12 @@ public class StegoTester {
         method.inject(password.getBytes(), message.getBytes(), stegoBytes);
         var extract = method.extract(password.getBytes(), stegoBytes);
 
+
         this.currentMethod = "encrypted";
         this.currentSource = source.getName();
+
+        ImageUtils.saveImage(stego, "results/stego_" + this.currentMethod.replaceAll(" +", "_") + ".png", "png");
+
         this.showMetrics(original, stego, message.getBytes(), extract);
         this.showDifferenceMap(original, originalBytes, stegoBytes);
         if (this.showHistogram) this.showHistogram(original, stego);
@@ -71,8 +78,12 @@ public class StegoTester {
         method.inject(password.getBytes(), message.getBytes(), stegoBytes);
         var extract = method.extract(password.getBytes(), stegoBytes);
 
+
         this.currentMethod = "encrypted random";
         this.currentSource = source.getName();
+
+        ImageUtils.saveImage(stego, "results/stego_" + this.currentMethod.replaceAll(" +", "_") + ".png", "png");
+
         this.showMetrics(original, stego, message.getBytes(), extract);
         this.showDifferenceMap(original, originalBytes, stegoBytes);
         if (this.showHistogram) this.showHistogram(original, stego);
@@ -92,7 +103,7 @@ public class StegoTester {
         var originalBytes = ImageUtils.getBytes(original);
         var stegoBytes = ImageUtils.getBytes(stego);
 
-        var pnsr  = Metrics.psnr(original, stego);
+        var psnr  = Metrics.psnr(original, stego);
         var ssim  = Metrics.ssim(originalBytes, stegoBytes);
 
         var xi2original = Metrics.xi2test(original);
@@ -109,7 +120,7 @@ public class StegoTester {
                 | Source: %-50s|
                 ├───────────────────────────────────────────────────────────┤
                 | PSNR          | %41.5f |
-                | SSIM          | %41.5f |
+                | SSIM          | %41.39f |
                 | ratio         | %40.5f%% |
                 | reversibility | %41b |
                 ├───────────────────────────────────────────────────────────┤
@@ -120,7 +131,7 @@ public class StegoTester {
                 └───────────────────────────────────────────────────────────┘
                 """,
                 this.currentMethod, this.currentSource,
-                pnsr, ssim, ratio,
+                psnr, ssim, ratio,
                 Arrays.compare(data, extract) == 0,
                 distOriginal[0], distOriginal[1], xi2original[0], xi2original[1],
                 distStego[0], distStego[1], xi2stego[0], xi2stego[1]

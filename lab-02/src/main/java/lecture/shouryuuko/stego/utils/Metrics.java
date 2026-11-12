@@ -1,11 +1,8 @@
 package lecture.shouryuuko.stego.utils;
 
 import org.apache.commons.math3.special.Gamma;
-import org.apache.commons.statistics.inference.ChiSquareTest;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Metrics {
     public static final double RED_IMPACT_COEFF   = 0.299;
@@ -19,7 +16,7 @@ public class Metrics {
         var mse = 0.0;
         for (int i = 0; i < original.getHeight(); ++i) {
             for (int j = 0; j < original.getWidth(); ++j) {
-                mse += Math.pow(getLightmass(original.getRGB(i, j)) - getLightmass(stego.getRGB(i, j)), 2);
+                mse += Math.pow(getLightmass(original.getRGB(j, i)) - getLightmass(stego.getRGB(j, i)), 2);
             }
         }
 
@@ -106,7 +103,7 @@ public class Metrics {
 
         var result = new byte[original.length];
         for (int i = 0; i < original.length; ++i) {
-            result[i] = (byte) Math.abs((original[i] & 0xFF - stego[i] & 0xFF) * 255);
+            result[i] = (byte) Math.abs(((original[i] & 0xFF) - (stego[i] & 0xFF)) * 255);
         }
 
         return result;
@@ -139,7 +136,7 @@ public class Metrics {
 
         var pvalue = Gamma.regularizedGammaQ(
                 freedom / 2.0,
-                xi2square
+                xi2square / 2.0
         );
 
         return new double[] { xi2square, pvalue };
